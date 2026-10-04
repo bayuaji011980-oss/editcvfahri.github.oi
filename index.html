@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editor CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap">
+<style>
+/* ================= TEMA CV (bisa diganti dari editor) ================= */
+:root{
+  --navy:#0e2f56; --navy2:#16426f; --teal:#0aa39a; --orange:#f39221; --red:#d9412e;
+  --ink:#1d2733; --muted:#5d6b79; --line:#dbe3ea; --tint:#eef6f6; --otint:#fff3e3; --tealsoft:#cdeeea; --orangesoft:#fde2bf; --sideText:#e8f0f7; --sideLabel:#9fc3df;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,system-ui,sans-serif;background:#d9dee5;color:#1d2733}
+
+/* ================= TATA LETAK EDITOR ================= */
+.app{display:grid;grid-template-columns:400px minmax(0,1fr);height:100vh}
+.editor{background:#f7f9fb;border-right:1px solid #cfd7e0;overflow-y:auto;padding:14px 14px 80px}
+.preview-wrap{overflow:auto;padding:24px}
+.topbar{position:sticky;top:-14px;z-index:5;background:#0e2f56;color:#fff;margin:-14px -14px 12px;padding:12px 14px;display:grid;gap:8px}
+.topbar h1{font:700 17px Poppins,sans-serif;margin:0;letter-spacing:.02em}
+.topbar p{margin:0;font-size:12px;color:#cfe3f2}
+.bar{display:flex;flex-wrap:wrap;gap:6px}
+.btn{font:600 13px Inter,sans-serif;border:1px solid #cfd7e0;background:#fff;color:#1d2733;border-radius:7px;padding:7px 11px;cursor:pointer}
+.btn:hover{border-color:#0e2f56}
+.btn.pri{background:#f39221;border-color:#f39221;color:#1b1100}
+.btn.teal{background:#0aa39a;border-color:#0aa39a;color:#fff}
+.btn.sm{font-size:12px;padding:4px 8px}
+.btn.del{color:#b4372b;border-color:#e9b9b2}
+details.sec-e{background:#fff;border:1px solid #dbe3ea;border-radius:9px;margin-bottom:10px}
+details.sec-e>summary{cursor:pointer;padding:10px 12px;font:600 14px Poppins,sans-serif;color:#0e2f56;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.sec-e>summary::after{content:"+";font-size:18px;color:#0aa39a}
+details.sec-e[open]>summary::after{content:"–"}
+.sec-body{padding:2px 12px 12px;display:grid;gap:9px}
+.fld{display:grid;gap:3px;font-size:12px;font-weight:600;color:#3b4855}
+.fld small{font-weight:400;color:#6b7886}
+.fld input,.fld textarea,.fld select{font:14px Inter,sans-serif;border:1px solid #cfd7e0;border-radius:6px;padding:7px 8px;width:100%;background:#fff;color:#1d2733}
+.fld textarea{min-height:70px;resize:vertical;line-height:1.4}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.job-e{border:1px solid #dbe3ea;border-left:4px solid #0aa39a;border-radius:8px;padding:10px;display:grid;gap:8px;background:#fbfdfd}
+.job-e .hd{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.job-e .hd b{font:600 13px Poppins,sans-serif;color:#0e2f56}
+.chk{display:flex;gap:6px;align-items:center;font-size:13px}
+.themes{display:flex;gap:8px;flex-wrap:wrap}
+.themes button{width:46px;height:30px;border-radius:7px;border:2px solid transparent;cursor:pointer}
+.themes button[aria-pressed="true"]{border-color:#1d2733}
+.photo-e{display:flex;gap:10px;align-items:center}
+.photo-e img{width:60px;height:72px;object-fit:cover;border-radius:6px;border:1px solid #cfd7e0}
+.att-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;font-size:12px;border:1px solid #dbe3ea;border-radius:7px;padding:6px 8px;background:#fff}
+.att-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.att-row .opts{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.att-row .opts input[type=text]{width:90px;font-size:12px;padding:3px 6px;border:1px solid #cfd7e0;border-radius:5px}
+.note{font-size:12px;color:#5d6b79;background:#eef6f6;border-radius:7px;padding:8px 10px;line-height:1.45}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1d2733;color:#fff;padding:9px 14px;border-radius:8px;font-size:13px;z-index:99}
+
+/* ================= HALAMAN CV ================= */
+.sheet{width:210mm;background:#fff;margin:0 auto 24px;box-shadow:0 4px 24px rgba(10,30,60,.18);position:relative;color:var(--ink);font-size:9.4pt;line-height:1.42}
+.cv h1,.cv h2,.cv h3{font-family:Poppins,sans-serif;margin:0}
+.cv ul{margin:0;padding:0;list-style:none}
+
+/* Halaman 1 */
+.p1{height:297mm;overflow:hidden}
+.side{position:absolute;left:0;top:0;bottom:0;width:70mm;background:var(--navy);color:var(--sideText);padding:0 8mm 10mm}
+.side::before{content:"";position:absolute;left:0;right:0;top:0;height:5mm;background:linear-gradient(to right,var(--teal) 0 60%,var(--orange) 60%)}
+.photo-wrap{margin:16mm auto 7mm;width:44mm;height:52mm;border-radius:6mm;background:linear-gradient(135deg,var(--teal),var(--orange));padding:1.4mm}
+.photo{width:100%;height:100%;border-radius:5mm;background-size:cover;background-repeat:no-repeat;border:1mm solid var(--navy)}
+.side h3{font-size:9.5pt;letter-spacing:.14em;text-transform:uppercase;color:#fff;margin:6mm 0 2.4mm;padding-bottom:1.6mm;border-bottom:.5mm solid var(--teal)}
+.side h3 span{color:var(--orange)}
+.ci{display:flex;gap:2.6mm;align-items:flex-start;margin-bottom:2.2mm;font-size:8.6pt;line-height:1.35}
+.ico{flex:none;width:5.6mm;height:5.6mm;border-radius:50%;background:var(--teal);color:#fff;font:700 7pt Poppins,sans-serif;text-align:center;line-height:5.6mm}
+.ico.o{background:var(--orange)}
+.kv{font-size:8.6pt;margin-bottom:1.6mm}
+.kv b{display:block;color:var(--sideLabel);font-weight:500;font-size:7.4pt;text-transform:uppercase;letter-spacing:.08em}
+.skill{font-size:8.5pt;margin-bottom:1.7mm;padding-left:3.6mm;position:relative;line-height:1.33}
+.skill::before{content:"";position:absolute;left:0;top:1.5mm;width:1.7mm;height:1.7mm;background:var(--orange);transform:rotate(45deg)}
+.tags{display:flex;flex-wrap:wrap;gap:1.4mm}
+.tag{font-size:7.6pt;font-weight:600;background:var(--navy2);border:.3mm solid var(--teal);color:#fff;border-radius:3mm;padding:.5mm 2.2mm}
+.main{margin-left:70mm;padding:14mm 11mm 8mm 10mm;font-size:9.6pt}
+.name{font-size:24pt;font-weight:800;color:var(--navy);line-height:1.05;letter-spacing:.01em;text-transform:uppercase}
+.name span{color:var(--teal)}
+.role{display:inline-block;margin-top:2.4mm;background:var(--orange);color:#fff;font:600 9pt Poppins,sans-serif;padding:1mm 3.4mm;border-radius:1.5mm;letter-spacing:.04em;text-transform:uppercase}
+.role2{font-size:8.8pt;color:var(--muted);margin-top:1.8mm}
+.sec{margin-top:5.6mm}
+.sec h2{font-size:11pt;color:var(--navy);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:2.4mm;margin-bottom:2.6mm}
+.sec h2::before{content:"";width:3.4mm;height:3.4mm;background:var(--teal);border-radius:.8mm;transform:rotate(45deg);flex:none}
+.sec h2::after{content:"";flex:1;height:.4mm;background:linear-gradient(to right,var(--teal),var(--orange) 70%,transparent)}
+.profile{background:var(--tint);border-left:1.2mm solid var(--teal);padding:3mm 3.6mm;border-radius:0 2mm 2mm 0;text-align:justify}
+.profile p{margin:0 0 1.6mm}.profile p:last-child{margin:0}
+.edu{display:flex;gap:3mm;margin-bottom:2.6mm;align-items:flex-start}
+.edu .yr{flex:none;width:15mm;background:var(--navy);color:#fff;font:700 8.6pt Poppins,sans-serif;text-align:center;border-radius:1.5mm;padding:1.4mm 0}
+.sec h2+.edu .yr{background:var(--orange)}
+.edu b{font:600 9.6pt Poppins,sans-serif;color:var(--navy);display:block;line-height:1.25}
+.edu span{color:var(--muted);font-size:8.6pt}
+.cert{display:flex;gap:2.6mm;align-items:center;margin-bottom:1.6mm;padding:1.5mm 2.6mm;border:.3mm solid var(--line);border-radius:1.6mm;background:#fff}
+.cert .n{flex:none;width:6mm;height:6mm;border-radius:50%;background:var(--teal);color:#fff;font:700 8pt Poppins,sans-serif;text-align:center;line-height:6mm}
+.cert:nth-child(even) .n{background:var(--orange)}
+.cert div{font-size:9pt;font-weight:600;line-height:1.3}
+.cert div small{display:block;font-weight:400;color:var(--muted);font-size:7.8pt}
+.isot{width:calc(100% + 3.2mm);border-collapse:separate;border-spacing:1.6mm;margin:-1.6mm}
+.isot td{background:var(--otint);border-radius:1.6mm;padding:1.6mm 2.6mm;font-size:8.6pt;line-height:1.3;vertical-align:top;width:50%}
+.isot td b{display:block;color:var(--red);font:600 8.8pt Poppins,sans-serif}
+
+/* Halaman pengalaman (header berulang tiap halaman saat dicetak) */
+.expsheet{min-height:297mm}
+.ptable{width:100%;border-collapse:collapse}
+.ptable td{padding:0}
+.band{height:15mm;background:var(--navy);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 14mm;border-bottom:1.6mm solid var(--teal);box-shadow:0 1mm 0 var(--orange)}
+.band b{font:700 10.5pt Poppins,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.band span{font:400 8.5pt Poppins,sans-serif;color:#cfe3f2}
+.hspace{height:9mm}
+.fspace{height:12mm}
+.expbody{padding:0 14mm}
+.exp-title{font-size:15pt;color:var(--navy);text-transform:uppercase;letter-spacing:.08em;margin:0 0 4mm;display:flex;align-items:center;gap:3mm}
+.exp-title::after{content:"";flex:1;height:.6mm;background:linear-gradient(to right,var(--teal),var(--orange) 70%,transparent)}
+.job{margin-bottom:6mm;position:relative;padding-left:7mm}
+.job::before{content:"";position:absolute;left:2mm;top:2mm;bottom:0;width:.6mm;background:var(--line)}
+.dotm{position:absolute;left:0;top:2.6mm;width:4.6mm;height:4.6mm;border-radius:50%;background:var(--teal);border:1mm solid var(--tealsoft)}
+.job.cur .dotm{background:var(--orange);border-color:var(--orangesoft)}
+.jh{break-inside:avoid;break-after:avoid;background:linear-gradient(to right,var(--navy),var(--navy2));color:#fff;border-radius:2mm;padding:3mm 4mm;display:flex;justify-content:space-between;gap:4mm;align-items:flex-start}
+.jh h3{font-size:12.5pt;line-height:1.15}
+.jh .co{font:600 9.6pt Poppins,sans-serif;color:#ffd08f;margin-top:.6mm}
+.period{flex:none;background:var(--teal);font:600 8.4pt Poppins,sans-serif;border-radius:1.4mm;padding:1mm 2.6mm;white-space:nowrap}
+.job.cur .period{background:var(--orange)}
+.jmeta{break-after:avoid;break-inside:avoid;display:flex;gap:2mm;flex-wrap:wrap;margin:2.4mm 0 2.6mm}
+.jmeta span{font-size:8.2pt;background:var(--tint);border:.3mm solid var(--tealsoft);border-radius:1.4mm;padding:.7mm 2.2mm}
+.jmeta span b{color:var(--teal)}
+.jd{break-after:avoid;font:600 9pt Poppins,sans-serif;color:var(--muted);margin:0 0 1.4mm}
+.phase{font:700 9pt Poppins,sans-serif;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin:2.2mm 0 1.2mm;break-after:avoid}
+.bl li{position:relative;padding-left:4mm;margin-bottom:.9mm;font-size:8.9pt;line-height:1.38;break-inside:avoid}
+.bl li::before{content:"";position:absolute;left:.4mm;top:1.5mm;width:1.6mm;height:1.6mm;border-radius:.4mm;background:var(--teal)}
+.bl.ex li::before{background:var(--orange)}
+.attach{break-inside:avoid;margin-top:4mm;border:.4mm solid var(--line);border-radius:2mm;overflow:hidden}
+.attach h3{background:var(--teal);color:#fff;font-size:10pt;padding:2.2mm 4mm;letter-spacing:.06em;text-transform:uppercase}
+.attach ol{margin:0;padding:2.6mm 4mm 2.6mm 9mm}
+.attach li{font-size:8.9pt;margin-bottom:1mm}
+.attach li small{color:var(--muted)}
+.sign{break-inside:avoid;margin-top:8mm;text-align:right;font-size:9pt;color:var(--muted)}
+.sign b{display:block;margin-top:14mm;font:600 10pt Poppins,sans-serif;color:var(--navy);border-top:.4mm solid var(--navy);padding-top:1mm;width:55mm;margin-left:auto;text-align:center}
+/* Halaman pengalaman yang sudah dipaginasi */
+.pg{height:297mm;overflow:hidden}
+.pgbody{position:absolute;left:14mm;right:14mm;top:26.6mm;height:254mm}
+.pgfoot{position:absolute;left:14mm;right:14mm;bottom:7mm;display:flex;justify-content:space-between;font-size:7.5pt;color:var(--muted);border-top:.3mm solid var(--line);padding-top:1.6mm}
+.job.cont{padding-top:0}
+.job.cont::before{top:0}
+.cv-pages{zoom:var(--z,1)}
+
+/* Mode review */
+.revbar{display:none}
+body.review .editor{display:none}
+body.review .app{grid-template-columns:1fr}
+body.review .preview-wrap{padding:74px 12px 24px;background:#4a5563}
+body.review .revbar{display:flex;position:fixed;top:0;left:0;right:0;z-index:20;background:#0e2f56;color:#fff;padding:10px 14px;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.revbar .ttl{font:600 15px Poppins,sans-serif;margin-right:auto}
+.revbar .ttl small{display:block;font:400 12px Inter,sans-serif;color:#cfe3f2}
+.busy{position:fixed;inset:0;background:rgba(14,47,86,.55);display:grid;place-items:center;z-index:200;color:#fff;font:600 15px Poppins,sans-serif}
+.busy div{background:#0e2f56;padding:18px 24px;border-radius:12px;text-align:center}
+
+@media (max-width:980px){
+  .app{grid-template-columns:1fr;height:auto}
+  .editor{border-right:0;overflow:visible}
+  .preview-wrap{padding:12px 0;overflow-x:hidden}
+}
+
+/* ================= CETAK ================= */
+@page{size:A4;margin:0}
+@media print{
+  html,body{background:#fff}
+  .editor,.toast,.revbar,.busy{display:none!important}
+  .app{display:block;height:auto}
+  .preview-wrap{padding:0!important;overflow:visible;background:#fff!important}
+  .cv-pages{zoom:1!important}
+  .sheet{box-shadow:none;margin:0;width:210mm;break-after:page}
+  .sheet:last-child{break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <!-- ================= EDITOR ================= -->
+  <aside class="editor">
+    <div class="topbar">
+      <h1>Editor CV</h1>
+      <p>Ubah isi di bawah, pratinjau di kanan ikut berubah. Tersimpan otomatis di browser ini.</p>
+      <div class="bar">
+        <button class="btn teal" id="bReview" type="button">Review</button>
+        <button class="btn pri" id="bSavePdf" type="button">Simpan PDF</button>
+        <button class="btn" id="bPrint" type="button">Cetak</button>
+        <button class="btn" id="bExport" type="button">Simpan data (.json)</button>
+        <label class="btn" style="display:inline-flex;align-items:center">Buka data<input type="file" id="fImport" accept=".json,application/json" hidden></label>
+        <button class="btn del" id="bReset" type="button">Reset</button>
+      </div>
+    </div>
+
+    <details class="sec-e" open><summary>Tema warna</summary><div class="sec-body">
+      <div class="themes" id="themes"></div>
+    </div></details>
+
+    <details class="sec-e" open><summary>Identitas &amp; foto</summary><div class="sec-body">
+      <div class="photo-e"><img id="phPrev" alt="Foto"><div style="display:grid;gap:6px;flex:1">
+        <label class="btn sm" style="text-align:center">Ganti foto<input type="file" id="fPhoto" accept="image/*" hidden></label>
+        <label class="fld">Posisi foto (atas–bawah)<input type="range" id="phPos" min="0" max="100" data-k="photoPos"></label>
+      </div></div>
+      <div class="row2">
+        <label class="fld">Nama depan<input data-k="name1"></label>
+        <label class="fld">Nama belakang<input data-k="name2"></label>
+      </div>
+      <label class="fld">Jabatan (label oranye)<input data-k="role"></label>
+      <label class="fld">Bidang industri (baris kecil)<input data-k="role2"></label>
+    </div></details>
+
+    <details class="sec-e"><summary>Kontak &amp; data diri</summary><div class="sec-body">
+      <label class="fld">No. HP<input data-k="phone"></label>
+      <label class="fld">Email<input data-k="email"></label>
+      <label class="fld">Alamat<textarea data-k="address" style="min-height:50px"></textarea></label>
+      <label class="fld">Tempat, tanggal lahir<input data-k="dob"></label>
+      <div class="row2">
+        <label class="fld">Jenis kelamin<input data-k="gender"></label>
+        <label class="fld">Kewarganegaraan<input data-k="nationality"></label>
+      </div>
+    </div></details>
+
+    <details class="sec-e"><summary>Profil singkat</summary><div class="sec-body">
+      <label class="fld">Judul bagian<input data-k="profileTitle"></label>
+      <label class="fld">Isi <small>(pisahkan paragraf dengan baris kosong)</small><textarea data-k="profile" style="min-height:150px"></textarea></label>
+    </div></details>
+
+    <details class="sec-e"><summary>Pendidikan</summary><div class="sec-body">
+      <label class="fld">Satu baris satu pendidikan <small>Format: Tahun | Gelar / Jurusan | Kampus</small><textarea data-k="education"></textarea></label>
+    </div></details>
+
+    <details class="sec-e"><summary>Training &amp; sertifikat</summary><div class="sec-body">
+      <label class="fld">Satu baris satu sertifikat <small>Format: Nama sertifikat | Penerbit (boleh kosong)</small><textarea data-k="certs" style="min-height:140px"></textarea></label>
+      <label class="fld">Training &amp; courses <small>Format: Kode | Keterangan</small><textarea data-k="courses" style="min-height:100px"></textarea></label>
+    </div></details>
+
+    <details class="sec-e"><summary>Kompetensi &amp; dokumen</summary><div class="sec-body">
+      <label class="fld">Kompetensi <small>(satu baris satu poin)</small><textarea data-k="skills" style="min-height:110px"></textarea></label>
+      <label class="fld">Dokumen yang dibuat <small>(satu baris satu label)</small><textarea data-k="docs" style="min-height:110px"></textarea></label>
+    </div></details>
+
+    <details class="sec-e"><summary>Pengalaman kerja</summary><div class="sec-body">
+      <div class="note">Urutkan dari yang terbaru. Poin pekerjaan: satu baris satu poin.</div>
+      <div id="jobs" style="display:grid;gap:10px"></div>
+      <button class="btn teal" id="bAddJob" type="button">+ Tambah pengalaman</button>
+    </div></details>
+
+    <details class="sec-e"><summary>Daftar lampiran &amp; tanda tangan</summary><div class="sec-body">
+      <label class="fld">Daftar lampiran di CV <small>Format: Nama dokumen | keterangan kecil</small><textarea data-k="attach" style="min-height:120px"></textarea></label>
+      <label class="fld">Nama di tanda tangan<input data-k="signName"></label>
+    </div></details>
+
+    <details class="sec-e"><summary>Gabung PDF: CV + ijazah + sertifikat</summary><div class="sec-body">
+      <div class="note"><b>Langkah 1.</b> Klik <b>Cetak / Simpan PDF</b>, pilih tujuan "Simpan sebagai PDF", ukuran A4, margin "Tidak ada", centang "Grafis latar".<br><b>Langkah 2.</b> Masukkan PDF hasil langkah 1 di bawah, lalu tambahkan ijazah dan sertifikat. Halaman lampiran disalin apa adanya.</div>
+      <label class="fld">PDF CV hasil cetak<input type="file" id="fCvPdf" accept="application/pdf"></label>
+      <label class="fld">Tambah lampiran <small>(PDF atau foto, bisa pilih banyak)</small><input type="file" id="fAtt" accept="application/pdf,image/*" multiple></label>
+      <div id="attList" style="display:grid;gap:6px"></div>
+      <button class="btn pri" id="bMerge" type="button">Download PDF gabungan</button>
+    </div></details>
+  </aside>
+
+  <!-- ================= PRATINJAU ================= -->
+  <main class="preview-wrap"><div id="cv" class="cv"></div></main>
+</div>
+
+<script>
+(function(){
+const PHOTO = "data:image/jpeg;base64,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";
+const DEFAULT = {
+  theme:0, photo:PHOTO, photoPos:20,
+  name1:"MUH FAHRI", name2:"ARDHIYANTO",
+  role:"HSE Professional · Lead HSE",
+  role2:"Data Centre · Geothermal · Oil & Gas · Civil Construction",
+  phone:"082144384147", email:"ardikndy@gmail.com",
+  address:"Ds. Kendayaan RT 07 RW 01, Kec. Ngawen, Kab. Blora, Jawa Tengah",
+  dob:"Blora, July 08th, 2002", gender:"Male", nationality:"Indonesian",
+  profileTitle:"Professional Experience",
+  profile:"Experience in the Data Centre, Geothermal and Oil & Gas Industry with various work: Casing Conductor, Access Road, Access Bridge, Well Pad, Tower Communication, Construction Pipe HDPE, Construction Pipe Process Geothermal, Oil & Gas and other. Expert in safety code/references standard applied in the Geothermal, Oil & Gas Industry.\n\nGood leadership skills, strong analytical capability, self-motivated, hard worker, fast learner, able to work under extreme pressure and having good communication and interpersonal skills to work as a team.",
+  education:"2025 | Sarjana Teknik (S.T.) – Civil Engineering | Universitas Esa Unggul, Jakarta · Faculty of Engineering",
+  certs:"Certificate General Occupational Health and Safety Expert | BNSP\nOccupational Safety and Health in Construction Certificate | Department of Public Works\nSHE Passport | Pertamina Geothermal\nDriving License |\nBasic Training Safety | Midiatama\nBasic Training Fire Fighting | Midiatama",
+  courses:"ISO 9001:2015 | Quality Management System\nISO 14001:2015 | Environmental Management System\nISO 37001 | Anti-Bribery Management System\nISO 45001:2018 | Occupational Health and Safety Management System\nLifting and Rigging |",
+  skills:"Microsoft Office Excel, Word & PowerPoint\nOperation of H2S Gas Detection System\nOperation of Diesel and Electric Compressor Equipment for Filling Breathing Apparatus / SCBA\nWelding and Machining\nFamiliar with Lifting & Rigging Procedure",
+  docs:"Work Permit\nJSA\nBBSO\nHIRADC / HIRA\nHSE Plan\nCSMS\nLifting Plan",
+  attach:"Ijazah Sarjana Teknik (S.T.) – Civil Engineering, Universitas Esa Unggul | 4 November 2025\nCertificate Ahli Keselamatan dan Kesehatan Kerja | Reg. No. 754/AK3/01/X/2024, valid until 24 October 2027\nSKK Petugas K3 Konstruksi – LSP SAKTI / BNSP | 2023\nSKK Ahli Muda Teknik Bangunan Gedung – LSP Astekindo Konstruksi Mandiri / BNSP | 2024\nBNSP Certificate of Competence – Ahli K3 / Occupational Health and Safety Expert | 2024\nCertificate & License Petugas Peran Kebakaran (Kelas D) – Kemnaker RI | March 2026",
+  signName:"Muh. Fahri Ardhiyanto",
+  jobs:[]
+};
+const EXEC_STD = "Attended Kick-Off Meeting presentation\nComplete the completeness of all workers before starting on duty (collect fit to work, and planning mobilization of personnel)\nDevelop Journey Management Plan to owner for approval\n{ESCORT}Monitoring Permit to Work (completed JSA, WMS, Lifting Plan already signed)\nConduct Toolbox Meeting at every start of job\nMake sure PPE is complete for all workers and inspect PPE periodically\nCoordination with Supervisors to ensure that the work site is in a safe condition\nCoordination with Trainers to train high-risk jobs such as Working at Height, Fire Training, Permit to Work Training, Defensive Driving Training and Confined Space Entry Permit etc.\nConduct quarterly P2K3 meetings\nDevelop and update safe working hours of all workers\nConduct safety patrol once a week\nDevelop weekly report and report to HSE Coordinator\nConduct daily, weekly and monthly meetings with Construction team\nCoordination with HSE Inspector to inspect all cars, tools and heavy equipment (daily, weekly and monthly)\nDevelop monthly report and report to HSE Coordinator\nUpdate stop card / BBS card and closing of findings\nReminder to all disciplines for KPI performance such as Fire Drill, Medevac Drill etc.\nUpdate KPI\nGive rewards to employees who excel and work safely, and provide punishment for workers who violate the rules\nDevelop a final report before the work is finished to review the shortcomings and positive values";
+const PREP_STD = "Request CSMS document from HSE Coordinator\nRequest HSE Plan document from HSE Coordinator\nRequest Method Statement document from Site Manager\nCoordination with Site Manager to develop readiness of all personnel\nInduction to all workers before entering the work site";
+DEFAULT.jobs = [
+  {role:"Lead HSE", company:"PT. Vetira Pribadi Kreasi", period:"Jan 2025 – Present", current:true,
+   m1l:"Client", m1:"Subcontractor from PT Tripatra Engineers and Constructors", loc:"Chrysalis Marunda Center Area, Bekasi", scope:"Structural",
+   prep:"Request CSMS document from Manager HSE\nRequest HSE Plan document from Manager HSE\nRequest Method Statement document from Project Manager\nCoordination with Site Manager to develop readiness of all personnel\nManagement of medical check-ups for all workers\nInduction to all workers before entering the work site\nFlagman training to escort vehicles every time they enter Project Gates 1, 2 and 3\nTraining supervisors or workers for managing permit holders",
+   exec:EXEC_STD.replace("{ESCORT}","Escort all mobilization of heavy equipment to site\n")},
+  {role:"HSE Officer", company:"PT. Tirtamas Berkah Makmur", period:"Oct 2024 – Jan 2025", current:false,
+   m1l:"Client", m1:"Subcontractor from PT CBN", loc:"PLN (PLTP Mataloko), Ngada, East Nusa Tenggara", scope:"Civil Work",
+   prep:PREP_STD, exec:EXEC_STD.replace("{ESCORT}","Escort all mobilization of heavy equipment to site\n")},
+  {role:"HSE Coordinator", company:"PT. Tirtamas Berkah Makmur", period:"Oct 2023 – Sep 2024", current:false,
+   m1l:"Project", m1:"Building Probowangi Toll Road, subcontractor from PT Brantas Abipraya", loc:"Probolinggo, East Java", scope:"Civil",
+   prep:"Develop CSMS document\nDevelop HSE Plan document\nAssist Site Manager to develop Method Statement document\nAssist HR to develop readiness of all personnel\nAssist Procurement Department to develop budget for HSE needs including PPE\nInduction to all workers before entering the work site",
+   exec:"Develop Kick-Off Meeting slides for HSE scope\nPresentation at Kick-Off Meeting of HSE scope\nDevelop Journey Management Plan to owner for approval\nAssign tasks to the Safety Officer to complete the completeness of all workers before starting on duty (MCU for fit to work and planning mobilization of personnel)\nDevelop Journey Management Plan document\nMonitoring Permit to Work (completed JSA, WMS, Lifting Plan already signed)\nConduct Toolbox Meeting at every start of job\nMake sure PPE is complete for all workers\nEnsuring a safe work location for all jobs\nProvide training for high-risk jobs such as Working at Height, Fire Training, Water Work, Permit to Work Training, Defensive Driving Training and Confined Space Work\nPrepare and develop P2K3 report, conduct P2K3 meetings and report to the Department of Labor every 3 months\nAsk the Safety Officer to make safe working hours\nConduct safety patrol once a week\nReview weekly report from Safety Officer\nConduct daily, weekly and monthly meetings with Operations\nReview inspection reports of all cars, tools and heavy equipment (daily, weekly and monthly) from Safety Officer\nReview monthly report document from Safety Officer\nSocialization and reminder to all personnel on board to participate in BBS report, and facilitator to Operations for closing findings if any\nCoordination with all stakeholders for Fire Drill, Medevac Drill and Abandon Drill\nReport to Owner (Daily Report, Weekly Report, Monthly Report, Inspection Report, Drill Report and results of environmental checks on water quality, dust, radiation, noise and environmental pollution)\nProvide rewards for employees who excel and work safely, and provide punishment for workers who violate the rules\nDevelop final report document of HSE scope"},
+  {role:"HSE Officer", company:"PT. Tirtamas Berkah Makmur", period:"May 2023 – Oct 2023", current:false,
+   m1l:"Client", m1:"Subcontractor from PT Citra Panji Manunggal under SEPCO III", loc:"Pertamina Geothermal Energy Lumut Balai, Muara Enim, South Sumatra", scope:"Civil and Mechanical",
+   prep:PREP_STD, exec:EXEC_STD.replace("{ESCORT}","Escort all mobilization of heavy equipment from Simpang Sumendo to site\n")},
+  {role:"HSE Officer", company:"PT. Dwi Mitra Ekatama Mandiri", period:"Jan 2022 – May 2023", current:false,
+   m1l:"Client", m1:"", loc:"PDG JC 2 MM2100 Industrial Estate, Bekasi, West Java", scope:"Mechanical and Electrical",
+   prep:PREP_STD, exec:EXEC_STD.replace("{ESCORT}","")}
+];
+
+const THEMES = [
+  {nm:"Navy · Toska · Oranye", v:{navy:"#0e2f56",navy2:"#16426f",teal:"#0aa39a",orange:"#f39221",red:"#d9412e",tint:"#eef6f6",otint:"#fff3e3",tealsoft:"#cdeeea",orangesoft:"#fde2bf",sideLabel:"#9fc3df"}},
+  {nm:"Hijau K3", v:{navy:"#11402e",navy2:"#1b5a41",teal:"#2bb673",orange:"#f2c230",red:"#c0392b",tint:"#edf8f2",otint:"#fff8dc",tealsoft:"#cdeedd",orangesoft:"#fbedb6",sideLabel:"#a9d8bf"}},
+  {nm:"Merah Safety", v:{navy:"#2a2f36",navy2:"#3a414b",teal:"#d63a2f",orange:"#f2a516",red:"#b52a20",tint:"#fbefee",otint:"#fff4de",tealsoft:"#f6cdc9",orangesoft:"#fde4b3",sideLabel:"#c9ced6"}},
+  {nm:"Biru Laut", v:{navy:"#0b2545",navy2:"#13315c",teal:"#2a7de1",orange:"#00b4d8",red:"#1d5fa8",tint:"#edf4fd",otint:"#e6f8fc",tealsoft:"#cfe2f8",orangesoft:"#c3eef7",sideLabel:"#a3bfe0"}},
+  {nm:"Ungu Elegan", v:{navy:"#2b1b4a",navy2:"#3d2866",teal:"#8e5bd8",orange:"#f2994a",red:"#a23b72",tint:"#f4effc",otint:"#fff1e5",tealsoft:"#e2d4f6",orangesoft:"#fcdcc0",sideLabel:"#c5b5e3"}}
+];
+
+const KEY="editor_cv_v1";
+let S;
+try{ S=JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+if(!S||!S.jobs) S=JSON.parse(JSON.stringify(DEFAULT));
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lines=s=>String(s||"").split("\n").map(x=>x.trim()).filter(Boolean);
+const parts=l=>l.split("|").map(x=>x.trim());
+function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2600); }
+
+let saveT; function save(){ clearTimeout(saveT); saveT=setTimeout(()=>{ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){ toast("Gagal menyimpan otomatis (foto terlalu besar?)"); } },300); }
+
+/* ---------- tema ---------- */
+function applyTheme(){ const t=THEMES[S.theme]||THEMES[0]; Object.entries(t.v).forEach(([k,v])=>document.documentElement.style.setProperty("--"+k,v)); }
+$("themes").innerHTML=THEMES.map((t,i)=>`<button type="button" title="${t.nm}" data-th="${i}" style="background:linear-gradient(135deg,${t.v.navy} 0 45%,${t.v.teal} 45% 72%,${t.v.orange} 72%)"></button>`).join("");
+$("themes").addEventListener("click",e=>{ const b=e.target.closest("[data-th]"); if(!b) return; S.theme=+b.dataset.th; markTheme(); applyTheme(); save(); });
+function markTheme(){ document.querySelectorAll("[data-th]").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.th===S.theme)); }
+
+/* ---------- field sederhana ---------- */
+function bindFields(){
+  document.querySelectorAll("[data-k]").forEach(el=>{
+    el.value=S[el.dataset.k]??"";
+    el.oninput=()=>{ S[el.dataset.k]= el.type==="range"? +el.value : el.value; render(); save(); };
+  });
+  $("phPrev").src=S.photo;
+}
+
+/* ---------- foto ---------- */
+$("fPhoto").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const im=new Image(); im.onload=()=>{
+    const max=700, sc=Math.min(1,max/Math.max(im.width,im.height));
+    const c=document.createElement("canvas"); c.width=Math.round(im.width*sc); c.height=Math.round(im.height*sc);
+    c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+    S.photo=c.toDataURL("image/jpeg",.88); $("phPrev").src=S.photo; render(); save(); URL.revokeObjectURL(im.src);
+  }; im.src=URL.createObjectURL(f);
+});
+
+/* ---------- pengalaman ---------- */
+function renderJobsEditor(){
+  $("jobs").innerHTML=S.jobs.map((j,i)=>`
+  <div class="job-e" data-i="${i}">
+    <div class="hd"><b>${i+1}. ${esc(j.role||"Jabatan")}</b><span style="display:flex;gap:4px">
+      <button class="btn sm" data-act="up" type="button" title="Naikkan">▲</button>
+      <button class="btn sm" data-act="down" type="button" title="Turunkan">▼</button>
+      <button class="btn sm del" data-act="del" type="button">Hapus</button></span></div>
+    <div class="row2"><label class="fld">Jabatan<input data-j="role" value="${esc(j.role)}"></label><label class="fld">Periode<input data-j="period" value="${esc(j.period)}"></label></div>
+    <label class="fld">Perusahaan<input data-j="company" value="${esc(j.company)}"></label>
+    <div class="row2"><label class="fld">Label<select data-j="m1l"><option${j.m1l==="Client"?" selected":""}>Client</option><option${j.m1l==="Project"?" selected":""}>Project</option><option${j.m1l==="Owner"?" selected":""}>Owner</option></select></label><label class="fld">Isi label<input data-j="m1" value="${esc(j.m1)}"></label></div>
+    <div class="row2"><label class="fld">Lokasi<input data-j="loc" value="${esc(j.loc)}"></label><label class="fld">Scope<input data-j="scope" value="${esc(j.scope)}"></label></div>
+    <label class="chk"><input type="checkbox" data-j="current"${j.current?" checked":""}> Masih bekerja di sini (warna oranye)</label>
+    <label class="fld">Preparation of Project<textarea data-j="prep" style="min-height:100px">${esc(j.prep)}</textarea></label>
+    <label class="fld">Project Execution<textarea data-j="exec" style="min-height:160px">${esc(j.exec)}</textarea></label>
+  </div>`).join("");
+}
+$("jobs").addEventListener("input",e=>{
+  const box=e.target.closest(".job-e"), k=e.target.dataset.j; if(!box||!k) return;
+  const j=S.jobs[+box.dataset.i]; j[k]= e.target.type==="checkbox"? e.target.checked : e.target.value;
+  if(k==="role") box.querySelector(".hd b").textContent=(+box.dataset.i+1)+". "+(j.role||"Jabatan");
+  render(); save();
+});
+$("jobs").addEventListener("change",e=>{ if(e.target.type==="checkbox"||e.target.tagName==="SELECT") $("jobs").dispatchEvent(new Event("input",{bubbles:true})) });
+$("jobs").addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return; const i=+b.closest(".job-e").dataset.i, a=b.dataset.act;
+  if(a==="del"){ if(b.dataset.sure){ S.jobs.splice(i,1); } else { b.dataset.sure="1"; b.textContent="Yakin?"; return; } }
+  if(a==="up"&&i>0) [S.jobs[i-1],S.jobs[i]]=[S.jobs[i],S.jobs[i-1]];
+  if(a==="down"&&i<S.jobs.length-1) [S.jobs[i+1],S.jobs[i]]=[S.jobs[i],S.jobs[i+1]];
+  renderJobsEditor(); render(); save();
+});
+$("bAddJob").addEventListener("click",()=>{ S.jobs.unshift({role:"Jabatan baru",company:"",period:"",current:false,m1l:"Client",m1:"",loc:"",scope:"",prep:"",exec:""}); renderJobsEditor(); render(); save(); });
+
+/* ---------- render CV ---------- */
+function render(){
+  const P=S;
+  const edu=lines(P.education).map(l=>{const [y,d,c]=parts(l); return `<div class="edu"><div class="yr">${esc(y)}</div><div><b>${esc(d)}</b><span>${esc(c)}</span></div></div>`;}).join("");
+  const certs=lines(P.certs).map((l,i)=>{const [n,s]=parts(l); return `<div class="cert"><span class="n">${i+1}</span><div>${esc(n)}${s?`<small>${esc(s)}</small>`:""}</div></div>`;}).join("");
+  const cs=lines(P.courses).map(parts); let rows=""; for(let i=0;i<cs.length;i+=2){ const a=cs[i], b=cs[i+1];
+    const cell=x=>`<td><b>${esc(x[0])}</b>${esc(x[1]||"")}</td>`;
+    rows+= b? `<tr>${cell(a)}${cell(b)}</tr>` : `<tr><td colspan="2"><b>${esc(a[0])}</b>${esc(a[1]||"")}</td></tr>`; }
+  const prof=String(P.profile||"").split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join("");
+  const jobs=P.jobs.map(j=>{
+    const meta=[j.m1?`<span><b>${esc(j.m1l||"Client")}:</b> ${esc(j.m1)}</span>`:"", j.loc?`<span><b>Location:</b> ${esc(j.loc)}</span>`:"", j.scope?`<span><b>Scope:</b> ${esc(j.scope)}</span>`:""].join("");
+    const pr=lines(j.prep), ex=lines(j.exec);
+    return `<div class="job${j.current?" cur":""}"><span class="dotm"></span>
+      <div class="jh"><div><h3>${esc(j.role)}</h3><div class="co">${esc(j.company)}</div></div>${j.period?`<div class="period">${esc(j.period)}</div>`:""}</div>
+      ${meta?`<div class="jmeta">${meta}</div>`:""}
+      <div class="jd">Job Descriptions of ${esc(j.role)}</div>
+      ${pr.length?`<div class="phase">Preparation of Project</div><ul class="bl">${pr.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+      ${ex.length?`<div class="phase">Project Execution</div><ul class="bl ex">${ex.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+    </div>`;}).join("");
+  const att=lines(P.attach).map(l=>{const [n,s]=parts(l); return `<li>${esc(n)}${s?` <small>(${esc(s)})</small>`:""}</li>`;}).join("");
+  const nameFull=(P.name1+" "+P.name2).trim();
+
+  $("cv").innerHTML=`
+  <section class="sheet p1">
+    <aside class="side">
+      <div class="photo-wrap"><div class="photo" style="background-image:url('${P.photo}');background-position:center ${P.photoPos}%"></div></div>
+      <h3>Contact <span>·</span></h3>
+      ${P.phone?`<div class="ci"><span class="ico">T</span><span>${esc(P.phone)}</span></div>`:""}
+      ${P.email?`<div class="ci"><span class="ico o">@</span><span>${esc(P.email)}</span></div>`:""}
+      ${P.address?`<div class="ci"><span class="ico">A</span><span>${esc(P.address)}</span></div>`:""}
+      <h3>Personal <span>·</span></h3>
+      ${P.dob?`<div class="kv"><b>Place, Date of Birth</b>${esc(P.dob)}</div>`:""}
+      ${P.gender?`<div class="kv"><b>Gender</b>${esc(P.gender)}</div>`:""}
+      ${P.nationality?`<div class="kv"><b>Nationality</b>${esc(P.nationality)}</div>`:""}
+      ${lines(P.skills).length?`<h3>Competency <span>·</span></h3>${lines(P.skills).map(s=>`<div class="skill">${esc(s)}</div>`).join("")}`:""}
+      ${lines(P.docs).length?`<h3>Develop Document <span>·</span></h3><div class="tags">${lines(P.docs).map(s=>`<span class="tag">${esc(s)}</span>`).join("")}</div>`:""}
+    </aside>
+    <div class="main">
+      <h1 class="name">${esc(P.name1)}<br><span>${esc(P.name2)}</span></h1>
+      ${P.role?`<div class="role">${esc(P.role)}</div>`:""}
+      ${P.role2?`<div class="role2">${esc(P.role2)}</div>`:""}
+      ${prof?`<div class="sec"><h2>${esc(P.profileTitle||"Profile")}</h2><div class="profile">${prof}</div></div>`:""}
+      ${edu?`<div class="sec"><h2>Education</h2>${edu}</div>`:""}
+      ${certs?`<div class="sec"><h2>Training &amp; Certificate</h2>${certs}</div>`:""}
+      ${rows?`<div class="sec"><h2>Training &amp; Courses</h2><table class="isot">${rows}</table></div>`:""}
+    </div>
+  </section>
+  <section class="sheet expsheet" id="expsheet">
+    <table class="ptable">
+      <thead><tr><td><div class="band"><b>${esc(nameFull)}</b><span>Curriculum Vitae · ${esc((P.role||"").split("·")[0].trim())}</span></div><div class="hspace"></div></td></tr></thead>
+      <tfoot><tr><td><div class="fspace"></div></td></tr></tfoot>
+      <tbody><tr><td><div class="expbody">
+        <h2 class="exp-title">Work Experience</h2>
+        ${jobs}
+        ${att?`<div class="attach"><h3>Attachments</h3><ol>${att}</ol></div>`:""}
+        ${P.signName?`<div class="sign">Sincerely,<b>${esc(P.signName)}</b></div>`:""}
+      </div></td></tr></tbody>
+    </table>
+  </section>`;
+  drawPageHints();
+}
+
+/* garis bantu batas halaman (hanya di layar, perkiraan) */
+function drawPageHints(){
+  const sh=$("expsheet"); if(!sh) return;
+  const mm=sh.getBoundingClientRect().width/210, pageH=297*mm, h=sh.scrollHeight;
+  let n=Math.ceil(h/pageH); for(let i=1;i<n;i++){ const d=document.createElement("div"); d.className="pagehint"; d.style.top=(i*pageH)+"px"; d.textContent="± batas halaman "+(i+2); sh.appendChild(d); }
+  sh.style.minHeight=(n*pageH)+"px";
+}
+window.addEventListener("resize",()=>render());
+
+/* ---------- tombol atas ---------- */
+$("bPrint").addEventListener("click",()=>window.print());
+$("bExport").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(S)],{type:"application/json"}); const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="Data_CV_"+(S.name1+"_"+S.name2).replace(/\s+/g,"_")+".json"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
+$("fImport").addEventListener("change",async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{ const d=JSON.parse(await f.text()); if(!d.jobs) throw 0; S=Object.assign(JSON.parse(JSON.stringify(DEFAULT)),d); init(); save(); toast("Data CV dimuat"); }
+  catch(err){ toast("File tidak dikenali sebagai data CV"); }
+  e.target.value="";
+});
+$("bReset").addEventListener("click",e=>{
+  const b=e.currentTarget; if(!b.dataset.sure){ b.dataset.sure="1"; b.textContent="Yakin reset?"; setTimeout(()=>{b.dataset.sure="";b.textContent="Reset";},3000); return; }
+  S=JSON.parse(JSON.stringify(DEFAULT)); init(); save(); b.dataset.sure=""; b.textContent="Reset"; toast("Kembali ke isi awal");
+});
+
+/* ---------- gabung PDF ---------- */
+let atts=[];
+$("fAtt").addEventListener("change",e=>{
+  [...e.target.files].forEach(f=>atts.push({file:f, range:"", fit:!/pdf/i.test(f.type)}));
+  e.target.value=""; renderAtt();
+});
+function renderAtt(){
+  $("attList").innerHTML=atts.map((a,i)=>`<div class="att-row" data-i="${i}"><span class="nm" title="${esc(a.file.name)}">${i+1}. ${esc(a.file.name)}</span>
+    <span style="display:flex;gap:4px"><button class="btn sm" data-a="up" type="button">▲</button><button class="btn sm" data-a="down" type="button">▼</button><button class="btn sm del" data-a="del" type="button">×</button></span>
+    <span class="opts">${/pdf/i.test(a.file.type)?`<label>Halaman <input type="text" data-o="range" value="${esc(a.range)}" placeholder="semua / 8-15"></label>`:""}
+    <label class="chk"><input type="checkbox" data-o="fit"${a.fit?" checked":""}> Pas-kan ke A4</label></span></div>`).join("");
+}
+$("attList").addEventListener("click",e=>{ const b=e.target.closest("[data-a]"); if(!b) return; const i=+b.closest(".att-row").dataset.i;
+  if(b.dataset.a==="del") atts.splice(i,1); if(b.dataset.a==="up"&&i>0)[atts[i-1],atts[i]]=[atts[i],atts[i-1]]; if(b.dataset.a==="down"&&i<atts.length-1)[atts[i+1],atts[i]]=[atts[i],atts[i+1]]; renderAtt(); });
+$("attList").addEventListener("input",e=>{ const o=e.target.dataset.o; if(!o) return; const a=atts[+e.target.closest(".att-row").dataset.i]; a[o]= e.target.type==="checkbox"?e.target.checked:e.target.value; });
+
+function parseRange(str,total){
+  str=(str||"").trim(); if(!str||/^semua$/i.test(str)) return [...Array(total).keys()];
+  const out=[]; str.split(",").forEach(p=>{ const m=p.trim().match(/^(\d+)\s*(?:-\s*(\d+))?$/); if(!m) return; let a=+m[1], b=m[2]?+m[2]:a; for(let k=a;k<=b;k++) if(k>=1&&k<=total) out.push(k-1); });
+  return out;
+}
+async function imgToJpgBytes(file){
+  const im=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(file); });
+  const c=document.createElement("canvas"); c.width=im.naturalWidth; c.height=im.naturalHeight; c.getContext("2d").drawImage(im,0,0);
+  const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.9)); return {bytes:new Uint8Array(await b.arrayBuffer()), w:c.width, h:c.height};
+}
+$("bMerge").addEventListener("click",async()=>{
+  if(!window.PDFLib){ toast("Library PDF belum termuat. Pastikan internet aktif lalu muat ulang."); return; }
+  const cvf=$("fCvPdf").files[0];
+  if(!cvf&&!atts.length){ toast("Masukkan PDF CV atau lampiran dulu"); return; }
+  const btn=$("bMerge"); btn.disabled=true; btn.textContent="Menggabungkan…";
+  try{
+    const {PDFDocument}=PDFLib; const out=await PDFDocument.create();
+    const A4P=[595.28,841.89];
+    async function addPdf(file,range,fit){
+      const src=await PDFDocument.load(await file.arrayBuffer(),{ignoreEncryption:true});
+      const idx=parseRange(range,src.getPageCount());
+      if(!fit){ (await out.copyPages(src,idx)).forEach(p=>out.addPage(p)); return; }
+      const emb=await out.embedPages(idx.map(i=>src.getPage(i)));
+      emb.forEach(ep=>{ const land=ep.width>ep.height; const [W,H]=land?[A4P[1],A4P[0]]:A4P; const s=Math.min(W/ep.width,H/ep.height);
+        const pg=out.addPage([W,H]); pg.drawPage(ep,{x:(W-ep.width*s)/2,y:(H-ep.height*s)/2,width:ep.width*s,height:ep.height*s}); });
+    }
+    if(cvf) await addPdf(cvf,"",false);
+    for(const a of atts){
+      if(/pdf/i.test(a.file.type)) await addPdf(a.file,a.range,a.fit);
+      else{ const im=await imgToJpgBytes(a.file); const jpg=await out.embedJpg(im.bytes);
+        let W=im.w, H=im.h; if(a.fit){ const land=W>H; [W,H]=land?[A4P[1],A4P[0]]:A4P; }
+        const s=Math.min(W/im.w,H/im.h); const pg=out.addPage([W,H]); pg.drawImage(jpg,{x:(W-im.w*s)/2,y:(H-im.h*s)/2,width:im.w*s,height:im.h*s}); }
+    }
+    out.setTitle("CV "+(S.name1+" "+S.name2).trim());
+    const bytes=await out.save(); const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([bytes],{type:"application/pdf"})); a.download="CV_"+(S.name1+"_"+S.name2).replace(/\s+/g,"_")+"_Lengkap.pdf"; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000); toast("PDF gabungan: "+out.getPageCount()+" halaman");
+  }catch(err){ console.error(err); toast("Gagal menggabungkan: "+(err.message||err)); }
+  finally{ btn.disabled=false; btn.textContent="Download PDF gabungan"; }
+});
+
+function init(){ applyTheme(); markTheme(); bindFields(); renderJobsEditor(); render(); }
+init();
+if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>render());
+})();
+</script>
+</body>
+</html>
